@@ -1,0 +1,58 @@
+MySQL Version - 5.7
+OS - Linux
+Username/Password - logan/logan123
+
+USER CREATION SCRIPT:
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE ON mysql.* to 'logan'@'localhost' identified by 'logan123';
+
+Login & Change Database:
+    mysql -u logan -p
+    >Password : logan123
+    >use mysql; --to change the database
+
+Root Username/Password - root/root4us
+
+Please refer the steps to FORCE reset the Root Password
+
+Database - mysql
+
+
+mysql> update user set host='%' where user='logan';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> GRANT ALL PRIVILEGES ON \*.\* TO 'logan'@'%' WITH GRANT OPTION;
+ERROR:
+Unknown command '\*'.
+ERROR:
+Unknown command '\*'.
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '\*.\* TO 'logan'@'%' WITH GRANT OPTION' at line 1
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'logan'@'%' WITH GRANT OPTION;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.00 sec)
+
+
+
+
+Tables and List of Columns:
+    1. REPORTS
+        REPORT_ID, REPORT_NAME, REPORT_TYPE (UI, EMAIL, BOTH), CREATED_DATE, MODIFIED_DATE
+    2. DB_HEALTH_CHECK_REPORT
+        REPORT_ID, ID, ENVIRONMENT, DATE & TIME OF THE RUN, CREATED_DATE, MODIFIED_DATE, 
+        VALIDATION_SCENARIO, COUNT, TRACKING_ID, COMMENTS, FIX
+
+Create Statements:
+1. DB_HEALTH_CHECK_REPORT
+    CREATE TABLE DB_HEALTH_CHECK_REPORT (
+        ID INT NOT NULL AUTO_INCREMENT,
+        REPORT_ID INT,
+        ENVIRONMENT VARCHAR(100),
+        EXECUTION_TIME DATETIME,
+        VALIDATION_SCENARIO VARCHAR(500),
+        COUNT INT,
+        TRACKING_ID VARCHAR(50),
+        COMMENTS VARCHAR(2000),
+        PRIMARY KEY (ID)
+    );

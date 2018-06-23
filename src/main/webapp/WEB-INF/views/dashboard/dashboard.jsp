@@ -1,0 +1,38 @@
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!doctype html>
+<html lang="en">
+    <jsp:include page="../include/header.jsp" />
+
+    <body>
+
+    <!-- TODO - Need to write the logic to display reports dynamically -->
+
+    <div class="container">
+        <c:if test="${not empty msg}">
+                <strong>${msg}</strong>
+            </div>
+        </c:if><br>
+        <h5>DB Health Check Report - <kbd>${dbHealthCheckList[0].executionTime}</kbd></h5> <br>
+
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Data Validation Scenario</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+
+            <c:forEach var="dbHealthCheck" items="${dbHealthCheckList}">
+                <tr onclick="updateAnalysis">
+                    <td>${dbHealthCheck.id}</td>
+                    <td>${dbHealthCheck.scenarioName}</td>
+                    <td>${dbHealthCheck.count}</td>
+                </tr>
+            </c:forEach>
+        </table>
+    </div>
+    </body>
+</html>
