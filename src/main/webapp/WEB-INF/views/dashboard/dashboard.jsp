@@ -10,29 +10,59 @@
     <!-- TODO - Need to write the logic to display reports dynamically -->
 
     <div class="container">
-        <c:if test="${not empty msg}">
-                <strong>${msg}</strong>
+        <div class="row">
+            <div class="col-md-3">
+
+                <div class="card card-inverse text-center" style="max-width: 202px;">
+                    <h6>DB Health Check - ${message}</h6>
+                    <img class="card-img-top" src="resources/images/dashboard_chart_1.png" alt="View Reports">
+                    <p>
+                        <a class="btn btn-primary" href="dbhealthcheck" role="button" >View Report</a>
+                    </p>
+                </div>
             </div>
-        </c:if><br>
-        <h5>DB Health Check Report - <kbd>${dbHealthCheckList[0].executionTime}</kbd></h5> <br>
+            <div class="col-md-3">
 
-        <table class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Data Validation Scenario</th>
-                    <th>Count</th>
-                </tr>
-            </thead>
+                <div class="card card-inverse text-center" style="max-width: 202px;">
+                    <h6>MVR Scheduler Report</h6>
+                    <img class="card-img-top" src="resources/images/dashboard_chart_2.png" alt="View Reports">
+                    <p>
+                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
 
-            <c:forEach var="dbHealthCheck" items="${dbHealthCheckList}">
-                <tr onclick="updateAnalysis">
-                    <td>${dbHealthCheck.id}</td>
-                    <td>${dbHealthCheck.scenarioName}</td>
-                    <td>${dbHealthCheck.count}</td>
-                </tr>
-            </c:forEach>
-        </table>
+                <div class="card card-inverse text-center" style="max-width: 202px;">
+                    <h6>Exception Log Report</h6>
+                    <img class="card-img-top" src="resources/images/dashboard_chart_3.png" alt="View Reports">
+                    <p>
+                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+
+                <div class="card card-inverse text-center" style="max-width: 202px;">
+                    <h6>RSM Record Count Check</h6>
+                    <img class="card-img-top" src="resources/images/dashboard_chart_2.png" alt="View Reports">
+                    <p>
+                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+
+                <div class="card card-inverse text-center" style="max-width: 202px;">
+                    <h6>RCA Tracker</h6>
+                    <img class="card-img-top" src="resources/images/dashboard_chart_5.png" alt="View Reports">
+                    <p>
+                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
     </body>
 </html>
+
