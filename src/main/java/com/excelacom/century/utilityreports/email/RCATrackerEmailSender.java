@@ -3,66 +3,63 @@ package com.excelacom.century.utilityreports.email;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
-public class EmailSender {
+public class RCATrackerEmailSender {
 
-    public JavaMailSender getEmailSender() {
-        return emailSender;
+    private JavaMailSender rcaTrackerEmailSenderImpl;
+    private SimpleMailMessage rcaTrackerReportMessage;
+
+    public JavaMailSender getRcaTrackerEmailSenderImpl() {
+        return rcaTrackerEmailSenderImpl;
     }
 
-    public void setEmailSender(JavaMailSender emailSender) {
-        this.emailSender = emailSender;
+    public void setRcaTrackerEmailSenderImpl(JavaMailSender rcaTrackerEmailSenderImpl) {
+        this.rcaTrackerEmailSenderImpl = rcaTrackerEmailSenderImpl;
     }
 
-    public SimpleMailMessage getDbHealthCheckReportMessage() {
-        return dbHealthCheckReportMessage;
+    public SimpleMailMessage getRcaTrackerReportMessage() {
+        return rcaTrackerReportMessage;
     }
 
-    public void setDbHealthCheckReportMessage(SimpleMailMessage dbHealthCheckReportMessage) {
-        this.dbHealthCheckReportMessage = dbHealthCheckReportMessage;
+    public void setRcaTrackerReportMessage(SimpleMailMessage rcaTrackerReportMessage) {
+        this.rcaTrackerReportMessage = rcaTrackerReportMessage;
     }
-
-    private JavaMailSender emailSender;
-
-    private SimpleMailMessage dbHealthCheckReportMessage;
 
     public void distributeReport(String outputFileName, LocalDateTime dateTime) throws MessagingException {
 
-        System.out.println("UtilityReports.distributeReport - Enter");
+        System.out.println("RCATrackerEmailSender.distributeReport - Enter");
         // DateTimeFormatter dateTimeFormatterReportGeneration = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm");
         DateTimeFormatter dateTimeFormatterReportGeneration = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String reportGenerationTime = dateTime.format(dateTimeFormatterReportGeneration);
         System.out.println("currentDateFileName : " + reportGenerationTime);
 
         System.out.println("Before mimeMessage Initialization...");
-        MimeMessage mimeMessage = getEmailSender().createMimeMessage();
+        MimeMessage mimeMessage = getRcaTrackerEmailSenderImpl().createMimeMessage();
 
         System.out.println("After mimeMessage Initialization...");
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
         System.out.println("After mimeMessageHelper Initialization...");
-        mimeMessageHelper.setFrom(getDbHealthCheckReportMessage().getFrom());
-        mimeMessageHelper.setTo(getDbHealthCheckReportMessage().getTo());
-        mimeMessageHelper.setSubject(String.format(getDbHealthCheckReportMessage().getSubject(),
+        mimeMessageHelper.setFrom(getRcaTrackerReportMessage().getFrom());
+        mimeMessageHelper.setTo(getRcaTrackerReportMessage().getTo());
+        mimeMessageHelper.setSubject(String.format(getRcaTrackerReportMessage().getSubject(),
                 reportGenerationTime));
-        mimeMessageHelper.setText(getDbHealthCheckReportMessage().getText());
+        mimeMessageHelper.setText(getRcaTrackerReportMessage().getText());
 
         System.out.println("After mimeMessageHelper setup...");
         FileSystemResource reportFile = new FileSystemResource(outputFileName);
         System.out.println("After reportFile...");
         mimeMessageHelper.addAttachment(reportFile.getFilename(), reportFile);
-        System.out.println("going to send mail : " + getDbHealthCheckReportMessage().getTo());
+        System.out.println("going to send mail : " + getRcaTrackerReportMessage().getTo());
 
-        getEmailSender().send(mimeMessage);
-        System.out.println("Utility Report Report Delivered Sent Successfully...");
+        getRcaTrackerEmailSenderImpl().send(mimeMessage);
+        System.out.println("RCATrackerEmailSender Report Delivered Sent Successfully...");
     }
 
 }

@@ -1,49 +1,49 @@
 package com.excelacom.century.utilityreports.jobexecutor;
 
 
-import com.excelacom.century.utilityreports.beans.DBHealthCheckBean;
-import com.excelacom.century.utilityreports.email.EmailSender;
-import com.excelacom.century.utilityreports.rowmapper.DBHealthCheckDisplayReportRowMapper;
-import com.excelacom.century.utilityreports.rowmapper.DBHealthCheckGeneratorRowMapper;
+import com.excelacom.century.utilityreports.beans.RCATrackerBean;
+import com.excelacom.century.utilityreports.email.RCATrackerEmailSender;
+import com.excelacom.century.utilityreports.rowmapper.RCATrackerDisplayReportRowMapper;
+import com.excelacom.century.utilityreports.rowmapper.RCATrackerGeneratorRowMapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class DBHealthCheckReportGenerator extends QuartzJobBean {
+public class RCATrackerReportGenerator extends QuartzJobBean {
 
-    private JdbcTemplate jdbcTemplate;
-
-    public EmailSender getDbHealthCheckEmailComponent() {
-        return dbHealthCheckEmailComponent;
+    public JdbcTemplate getRcaTrackerGeneratorJdbcTemplate() {
+        return rcaTrackerGeneratorJdbcTemplate;
     }
 
-    public void setDbHealthCheckEmailComponent(EmailSender dbHealthCheckEmailComponent) {
-        this.dbHealthCheckEmailComponent = dbHealthCheckEmailComponent;
+    public void setRcaTrackerGeneratorJdbcTemplate(JdbcTemplate rcaTrackerGeneratorJdbcTemplate) {
+        this.rcaTrackerGeneratorJdbcTemplate = rcaTrackerGeneratorJdbcTemplate;
     }
 
-    private EmailSender dbHealthCheckEmailComponent;
+    private JdbcTemplate rcaTrackerGeneratorJdbcTemplate;
 
+    public RCATrackerEmailSender getRcaTrackerEmailComponent() {
+        return rcaTrackerEmailComponent;
+    }
+
+    public void setRcaTrackerEmailComponent(RCATrackerEmailSender rcaTrackerEmailComponent) {
+        this.rcaTrackerEmailComponent = rcaTrackerEmailComponent;
+    }
+
+    private RCATrackerEmailSender rcaTrackerEmailComponent;
 
     private String queryInputFile;
 
@@ -86,46 +86,40 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
     private String outputFileExtension;
 
 
-    public JdbcTemplate getMySQLJdbcTemplate() {
-        return mySQLJdbcTemplate;
+    public JdbcTemplate getRcaTrackerMySQLServerJdbcTemplate() {
+        return rcaTrackerMySQLServerJdbcTemplate;
     }
 
-    public void setMySQLJdbcTemplate(JdbcTemplate mySQLJdbcTemplate) {
-        this.mySQLJdbcTemplate = mySQLJdbcTemplate;
+    public void setRcaTrackerMySQLServerJdbcTemplate(JdbcTemplate rcaTrackerMySQLServerJdbcTemplate) {
+        this.rcaTrackerMySQLServerJdbcTemplate = rcaTrackerMySQLServerJdbcTemplate;
     }
 
-    private JdbcTemplate mySQLJdbcTemplate;
+    private JdbcTemplate rcaTrackerMySQLServerJdbcTemplate;
 
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
-    }
 
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        System.out.println("DB Health Check Report Generator - Enter");
-        setJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("jdbcTemplate"));
-        setMySQLJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("localMySQLServerJdbcTemplate"));
+        System.out.println("RCA Tracker Report Generator - Enter");
+        setRcaTrackerGeneratorJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("rcaTrackerGeneratorJdbcTemplate"));
+        setRcaTrackerMySQLServerJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("rcaTrackerMySQLServerJdbcTemplate"));
         setQueryInputFile((String) jobExecutionContext.getJobDetail().getJobDataMap().get("queryInputFile"));
         setOutputFilePath((String) jobExecutionContext.getJobDetail().getJobDataMap().get("outputFilePath"));
         setOutputFileName((String) jobExecutionContext.getJobDetail().getJobDataMap().get("outputFileName"));
         setOutputFileExtension((String) jobExecutionContext.getJobDetail().getJobDataMap().get("outputFileExtension"));
-        setDbHealthCheckEmailComponent((EmailSender) jobExecutionContext.getJobDetail().getJobDataMap().get("dbHealthCheckEmailComponent"));
+        setRcaTrackerEmailComponent((RCATrackerEmailSender) jobExecutionContext.getJobDetail().getJobDataMap().get("rcaTrackerEmailComponent"));
         LocalDateTime dateFileName = LocalDateTime.now();
         generateReport(dateFileName);
         String outputFileName1 = generateFile(dateFileName);
         //String outputFileName1 = "C:\\Loganathan\\DBHealthCheckReport_2018-03-09.xlsx";
         try {
-            System.out.println("outputFileName1 : " + outputFileName1);
-            getDbHealthCheckEmailComponent().distributeReport(outputFileName1, dateFileName);
+            System.out.println("RCA Tracker - Output File Name : " + outputFileName1);
+            getRcaTrackerEmailComponent().distributeReport(outputFileName1, dateFileName);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
 
-        System.out.println("DB Health Check Report Generator - Exit");
+        System.out.println("RCA Tracker Report Generator - Exit");
     }
 
 
@@ -157,22 +151,49 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
                 }
             }
 
-            List<DBHealthCheckBean> dbHealthCheckBeanList = new ArrayList<DBHealthCheckBean>();
+            List<RCATrackerBean> rcaTrackerBeanList = new ArrayList<RCATrackerBean>();
 
             for (StringBuilder query : queryList) {
                 System.out.println(query);
-                DBHealthCheckBean dbHealthCheckBean = getJdbcTemplate().queryForObject(query.toString(),
-                        new DBHealthCheckGeneratorRowMapper());
 
-                dbHealthCheckBeanList.add(dbHealthCheckBean);
+                try {
+                    System.out.println("Query Timeout - Default Value : " + getRcaTrackerGeneratorJdbcTemplate().getQueryTimeout());
+                    getRcaTrackerGeneratorJdbcTemplate().setQueryTimeout(200);
+                    System.out.println("Query Timeout - Modified Value : " + getRcaTrackerGeneratorJdbcTemplate().getQueryTimeout());
+
+                    System.out.println("java.net.useSystemProxies - Default Value : " + System.getProperty("java.net.useSystemProxies"));
+                    System.setProperty("java.net.useSystemProxies", "false");
+                    System.out.println("java.net.useSystemProxies - Modified Value : " + System.getProperty("java.net.useSystemProxies"));
+
+                    rcaTrackerBeanList = getRcaTrackerGeneratorJdbcTemplate().query(query.toString(),
+                            new RCATrackerGeneratorRowMapper());
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
+                //rcaTrackerBeanList.add(rcaTrackerBean);
 
             }
 
-            for (DBHealthCheckBean dbHealthCheckBean : dbHealthCheckBeanList) {
+            System.out.println("After Query Execution...");
+            for (RCATrackerBean rcaTrackerBean : rcaTrackerBeanList) {
 
-                getMySQLJdbcTemplate().update("INSERT INTO DB_HEALTH_CHECK_REPORT " +
-                                "(EXECUTION_TIME, VALIDATION_SCENARIO, COUNT) VALUES (?, ?, ?)", currentDate,
-                        dbHealthCheckBean.getScenarioName(), dbHealthCheckBean.getCount());
+                getRcaTrackerMySQLServerJdbcTemplate().update("INSERT INTO RCA_TRACKER_REPORT " +
+                                "(EXECUTION_TIME, INCIDENTTICKET, INCIDENTREQUESTOR, INCIDENTOWNER," +
+                                "INCIDENTSUBJECT, INCIDENTREQUESTORNAME, INCIDENTRESOLVEDBY, INCIDENTDESCRIPTION," +
+                                "INCIDENTSTATUS, INCIDENTCREATEDDATE, INCIDENTASSIGNEDDATE, INCIDENTMODIFIEDDATE," +
+                                "INCIDENTRESOLVEDDATE, PRIORITY) VALUES (?, ?, ?, ?," +
+                                "?, ?, ?, ?," +
+                                "?, ?, ?, ?," +
+                                "?, ?)", currentDate,
+                        rcaTrackerBean.getIncidentTicketNumber(), rcaTrackerBean.getIncidentRequestor(),
+                        rcaTrackerBean.getIncidentOwner(), rcaTrackerBean.getIncidentSubject(),
+                        rcaTrackerBean.getIncidentRequestorName(), rcaTrackerBean.getIncidentResolvedBy(),
+                        rcaTrackerBean.getIncidentDescription(), rcaTrackerBean.getIncidentStatus(),
+                        rcaTrackerBean.getIncidentCreatedDate(), rcaTrackerBean.getIncidentAssignedDate(),
+                        rcaTrackerBean.getIncidentModifiedDate(), rcaTrackerBean.getIncidentResolvedDate(),
+                        rcaTrackerBean.getIncidentPriority()
+                );
 
             }
         } catch (Exception e) {
@@ -196,32 +217,100 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
             System.out.println(sqlWritePath);
 
             XSSFWorkbook workbook = new XSSFWorkbook();
-            XSSFSheet sheet = workbook.createSheet("DB Health Check");
+            XSSFSheet sheet = workbook.createSheet("RCA Tracker");
 
             int rowNum = 0;
 
             Row headerRow = sheet.createRow(rowNum);
             Cell headerCell = headerRow.createCell(0);
-            headerCell.setCellValue("Validation Scenario");
+            headerCell.setCellValue("Incident Ticket Number");
 
             headerCell = headerRow.createCell(1);
-            headerCell.setCellValue("Count");
+            headerCell.setCellValue("Incident Requestor");
 
-            List<DBHealthCheckBean> dbHealthCheckBeanList = getMySQLJdbcTemplate().query("select * from DB_HEALTH_CHECK_REPORT " +
+            headerCell = headerRow.createCell(2);
+            headerCell.setCellValue("Incident Owner");
+
+            headerCell = headerRow.createCell(3);
+            headerCell.setCellValue("Incident Subject");
+
+            headerCell = headerRow.createCell(4);
+            headerCell.setCellValue("Incident Requestor Name");
+
+            headerCell = headerRow.createCell(5);
+            headerCell.setCellValue("Incident Resolved By");
+
+            headerCell = headerRow.createCell(6);
+            headerCell.setCellValue("Incident Description");
+
+            headerCell = headerRow.createCell(7);
+            headerCell.setCellValue("Incident Status");
+
+            headerCell = headerRow.createCell(8);
+            headerCell.setCellValue("Incident Created Date");
+
+            headerCell = headerRow.createCell(9);
+            headerCell.setCellValue("Incident Assigned Date");
+
+            headerCell = headerRow.createCell(10);
+            headerCell.setCellValue("Incident Modified Date");
+
+            headerCell = headerRow.createCell(11);
+            headerCell.setCellValue("Incident Resolved Date");
+
+            headerCell = headerRow.createCell(12);
+            headerCell.setCellValue("Incident Priority");
+
+
+            List<RCATrackerBean> rcaTrackerBeanList = getRcaTrackerMySQLServerJdbcTemplate().query("select * from RCA_TRACKER_REPORT " +
                     "where execution_time = (select distinct(max(execution_time)) from " +
-                    " DB_HEALTH_CHECK_REPORT) order by count desc", new DBHealthCheckDisplayReportRowMapper());
+                    " RCA_TRACKER_REPORT) order by INCIDENTTICKET", new RCATrackerDisplayReportRowMapper());
 
 
-            for (DBHealthCheckBean dbHealthCheckBean : dbHealthCheckBeanList) {
+            for (RCATrackerBean rcaTrackerBean : rcaTrackerBeanList) {
 
-                System.out.println(dbHealthCheckBean.getScenarioName());
-                System.out.println(dbHealthCheckBean.getCount());
+                System.out.println(rcaTrackerBean.getId());
+                System.out.println(rcaTrackerBean.getIncidentTicketNumber());
+                System.out.println(rcaTrackerBean.getIncidentDescription());
                 Row row = sheet.createRow(++rowNum);
                 Cell cell = row.createCell(0);
-                cell.setCellValue(dbHealthCheckBean.getScenarioName());
+                cell.setCellValue(rcaTrackerBean.getIncidentTicketNumber());
 
                 cell = row.createCell(1);
-                cell.setCellValue(dbHealthCheckBean.getCount());
+                cell.setCellValue(rcaTrackerBean.getIncidentRequestor());
+
+                cell = row.createCell(2);
+                cell.setCellValue(rcaTrackerBean.getIncidentOwner());
+
+                cell = row.createCell(3);
+                cell.setCellValue(rcaTrackerBean.getIncidentSubject());
+
+                cell = row.createCell(4);
+                cell.setCellValue(rcaTrackerBean.getIncidentRequestorName());
+
+                cell = row.createCell(5);
+                cell.setCellValue(rcaTrackerBean.getIncidentResolvedBy());
+
+                cell = row.createCell(6);
+                cell.setCellValue(rcaTrackerBean.getIncidentDescription());
+
+                cell = row.createCell(7);
+                cell.setCellValue(rcaTrackerBean.getIncidentStatus());
+
+                cell = row.createCell(8);
+                cell.setCellValue(rcaTrackerBean.getIncidentCreatedDate());
+
+                cell = row.createCell(9);
+                cell.setCellValue(rcaTrackerBean.getIncidentAssignedDate());
+
+                cell = row.createCell(10);
+                cell.setCellValue(rcaTrackerBean.getIncidentModifiedDate());
+
+                cell = row.createCell(11);
+                cell.setCellValue(rcaTrackerBean.getIncidentResolvedDate());
+
+                cell = row.createCell(12);
+                cell.setCellValue(rcaTrackerBean.getIncidentPriority());
             }
 
             FileOutputStream fileOutputStream = new FileOutputStream(sqlWritePath);

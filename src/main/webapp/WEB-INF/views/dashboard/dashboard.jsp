@@ -27,7 +27,7 @@
                     <h6>MVR Scheduler Report</h6>
                     <img class="card-img-top" src="resources/images/dashboard_chart_2.png" alt="View Reports">
                     <p>
-                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                        <a class="btn btn-primary" href="#" role="button" >Under Construction</a>
                     </p>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     <h6>Exception Log Report</h6>
                     <img class="card-img-top" src="resources/images/dashboard_chart_3.png" alt="View Reports">
                     <p>
-                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                        <a class="btn btn-primary" href="#" role="button" >Under Construction</a>
                     </p>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     <h6>RSM Record Count Check</h6>
                     <img class="card-img-top" src="resources/images/dashboard_chart_2.png" alt="View Reports">
                     <p>
-                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                        <a class="btn btn-primary" href="#" role="button" >Under Construction</a>
                     </p>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                     <h6>RCA Tracker</h6>
                     <img class="card-img-top" src="resources/images/dashboard_chart_5.png" alt="View Reports">
                     <p>
-                        <a class="btn btn-primary" href="#" role="button" >View Report</a>
+                        <a class="btn btn-primary" href="rcatracker" role="button" >View Report</a>
                     </p>
                 </div>
             </div>

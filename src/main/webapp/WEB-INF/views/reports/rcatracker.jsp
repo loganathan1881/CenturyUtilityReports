@@ -14,22 +14,44 @@
                 <strong>${msg}</strong>
             </div>
         </c:if><br>
-        <h5>DB Health Check Report - <kbd>${dbHealthCheckList[0].executionTime}</kbd></h5> <br>
+        <h5>RCA Tracker Report - <kbd>${rcaTrackerList[0].executionTime}</kbd></h5> <br>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Data Validation Scenario</th>
-                    <th>Count</th>
+
+                    <th>Incident Number</th>
+                    <th>Incident Requestor</th>
+                    <th>Incident Owner</th>
+                    <th>Incident Subject</th>
+                    <th>Incident Reqestor Name</th>
+                    <th>Incident Solved By</th>
+                    <th>Incident Description</th>
+                    <th>Incident Status</th>
+                    <th>Incident Created Date</th>
+                    <th>Incident Assigned Date</th>
+                    <th>Incident Modified Date</th>
+                    <th>Incident Resolved Date</th>
+                    <th>Priority</th>
                 </tr>                
             </thead>
 
-            <c:forEach var="dbHealthCheck" items="${dbHealthCheckList}">
+            <c:forEach var="rcaTracker" items="${rcaTrackerList}">
                 <tr>
-                    <td>${dbHealthCheck.id}</td>
-                    <td>${dbHealthCheck.scenarioName}</td>
-                    <td>${dbHealthCheck.count}</td>
+
+                    <td>${rcaTracker.incidentTicketNumber}</td>
+                    <td>${rcaTracker.incidentRequestor}</td>
+                    <td>${rcaTracker.incidentOwner}</td>
+                    <td>${rcaTracker.incidentSubject}</td>
+                    <td>${rcaTracker.incidentRequestorName}</td>
+                    <td>${rcaTracker.incidentResolvedBy}</td>
+                    <td>${rcaTracker.incidentDescription}</td>
+                    <td>${rcaTracker.incidentStatus}</td>
+                    <td>${rcaTracker.incidentCreatedDate}</td>
+                    <td>${rcaTracker.incidentAssignedDate}</td>
+                    <td>${rcaTracker.incidentModifiedDate}</td>
+                    <td>${rcaTracker.incidentResolvedDate}</td>
+                    <td>${rcaTracker.incidentPriority}</td>
                 </tr>
             </c:forEach> 
         </table>

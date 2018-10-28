@@ -1,35 +1,34 @@
 package com.excelacom.century.utilityreports.helper;
 
-import com.excelacom.century.utilityreports.beans.DBHealthCheckBean;
-import com.excelacom.century.utilityreports.rowmapper.DBHealthCheckDisplayReportRowMapper;
-import com.excelacom.century.utilityreports.rowmapper.DBHealthCheckGeneratorRowMapper;
+import com.excelacom.century.utilityreports.beans.RCATrackerBean;
+import com.excelacom.century.utilityreports.rowmapper.RCATrackerDisplayReportRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
-public class DBHealthCheckReportDisplayHelper {
+public class RCATrackerReportDisplayHelper {
 
-    private JdbcTemplate localMySQLServerJdbcTemplate;
-
-    public JdbcTemplate getLocalMySQLServerJdbcTemplate() {
-        return localMySQLServerJdbcTemplate;
+    public JdbcTemplate getRcaTrackerMySQLServerJdbcTemplate() {
+        return rcaTrackerMySQLServerJdbcTemplate;
     }
 
-    public void setLocalMySQLServerJdbcTemplate(JdbcTemplate localMySQLServerJdbcTemplate) {
-        this.localMySQLServerJdbcTemplate = localMySQLServerJdbcTemplate;
+    public void setRcaTrackerMySQLServerJdbcTemplate(JdbcTemplate rcaTrackerMySQLServerJdbcTemplate) {
+        this.rcaTrackerMySQLServerJdbcTemplate = rcaTrackerMySQLServerJdbcTemplate;
     }
 
-    public List<DBHealthCheckBean> getReport() {
-        System.out.println("DBHealthCheckReportDisplayHelper - Enter");
+    private JdbcTemplate rcaTrackerMySQLServerJdbcTemplate;
 
-        List<DBHealthCheckBean> dbHealthCheckBeanList = getLocalMySQLServerJdbcTemplate().query("select * from DB_HEALTH_CHECK_REPORT " +
+
+
+    public List<RCATrackerBean> getReport() {
+        System.out.println("RCATrackerReportDisplayHelper - Enter");
+
+        List<RCATrackerBean> rcaTrackerBean = getRcaTrackerMySQLServerJdbcTemplate().query("select * from RCA_TRACKER_REPORT " +
                 "where execution_time = (select distinct(max(execution_time)) from " +
-                        " DB_HEALTH_CHECK_REPORT) order by count desc", new DBHealthCheckDisplayReportRowMapper());
+                        " RCA_TRACKER_REPORT) order by INCIDENTTICKET", new RCATrackerDisplayReportRowMapper());
 
-        System.out.println("DBHealthCheckReportDisplayHelper - Exit");
-        return dbHealthCheckBeanList;
+        System.out.println("RCATrackerReportDisplayHelper - Exit");
+        return rcaTrackerBean;
     }
 }

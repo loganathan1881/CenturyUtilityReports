@@ -1,0 +1,112 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!--QUARTZ CONFIGURATION -->
+
+    <!-- Quart Job Configuration -->
+    <bean name="dBHealthCheckReportDisplayHelper" class="com.excelacom.century.utilityreports.helper.DBHealthCheckReportDisplayHelper">
+        <property name="dbHealthCheckMySQLServerJdbcTemplate" ref="dbHealthCheckMySQLServerJdbcTemplate"/>
+    </bean>
+
+    <!-- Scheduler Configuration -->
+    <bean name="dbHealthCheckReportGeneratorScheduler"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass"
+                  value="com.excelacom.century.utilityreports.jobexecutor.DBHealthCheckReportGenerator"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="dbHealthCheckGeneratorJdbcTemplate" value-ref="dbHealthCheckGeneratorJdbcTemplate"/>
+                <entry key="dbHealthCheckMySQLServerJdbcTemplate" value-ref="dbHealthCheckMySQLServerJdbcTemplate"/>
+                <entry key="queryInputFile" value="${dbhealthcheckreport.generator.input.queryfile}"/>
+                <entry key="outputFilePath" value="${dbhealthcheckreport.generator.output.filepath}"/>
+                <entry key="outputFileName" value="${dbhealthcheckreport.generator.output.filename}"/>
+                <entry key="outputFileExtension" value="${dbhealthcheckreport.generator.output.fileextension}"/>
+                <entry key="dbHealthCheckEmailComponent" value-ref="dbHealthCheckEmailComponent"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean name="dbHealthCheckEmailComponent" class="com.excelacom.century.utilityreports.email.EmailSender">
+        <property name="emailSender" ref="emailSenderImpl"/>
+        <property name="dbHealthCheckReportMessage" ref="dbHealthCheckReportMessage"/>
+    </bean>
+
+    <!-- CRON Expression -->
+    <bean id="dbHealthCheckGeneratorTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="dbHealthCheckReportGeneratorScheduler"/>
+        <property name="cronExpression" value="${dbhealthcheckreport.generator.cronexpression}"/>
+    </bean>
+
+    <!-- Bind triggers with the Scheduler -->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="dbHealthCheckGeneratorTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Oralce Database Configuration -->
+    <bean id="dbHealthCheckGeneratorDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dbhealthcheckreport.generator.oracle.classname}"/>
+        <property name="url" value="${dbhealthcheckreport.generator.oracle.url}"/>
+        <property name="username" value="${dbhealthcheckreport.generator.oracle.username}"/>
+        <property name="password" value="${dbhealthcheckreport.generator.oracle.password}"/>
+    </bean>
+
+    <bean id="dbHealthCheckGeneratorJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dbHealthCheckGeneratorDataSource"/>
+    </bean>
+
+    <!-- MySQL Database Configuration -->
+    <bean id="dbHealthCheckMySQLServerDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dbhealthcheckreport.distributor.mysql.classname}"/>
+        <property name="url" value="${dbhealthcheckreport.distributor.mysql.url}"/>
+        <property name="username" value="${dbhealthcheckreport.distributor.mysql.username}"/>
+        <property name="password" value="${dbhealthcheckreport.distributor.mysql.password}"/>
+    </bean>
+
+    <bean id="dbHealthCheckMySQLServerJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dbHealthCheckMySQLServerDataSource"/>
+    </bean>
+
+    <!-- Email Configuration -->
+    <bean id="emailSenderImpl" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${utilityreports.email.smtp.host}"/>
+        <property name="port" value="${utilityreports.email.smtp.port}"/>
+        <property name="username" value="${utilityreports.email.smtp.username}"/>
+        <property name="password" value="${utilityreports.email.smtp.password}"/>
+
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.debug">true</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="dbHealthCheckReportMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="from" value="${dbhealthcheckreport.distributor.email.from}"/>
+        <property name="to" value="${dbhealthcheckreport.distributor.email.to}"/>
+        <property name="subject" value="${dbhealthcheckreport.distributor.email.subject}"/>
+        <property name="text">
+            <value>
+                <![CDATA[
+                    ${dbhealthcheckreport.distributor.email.body}
+                ]]>
+            </value>
+        </property>
+    </bean>
+
+</beans>

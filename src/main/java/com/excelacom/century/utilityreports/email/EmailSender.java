@@ -36,7 +36,7 @@ public class EmailSender {
 
     public void distributeReport(String outputFileName, LocalDateTime dateTime) throws MessagingException {
 
-        System.out.println("DBHealthCheckReportGenerator.distributeReport - Enter");
+        System.out.println("UtilityReports.distributeReport - Enter");
         // DateTimeFormatter dateTimeFormatterReportGeneration = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm");
         DateTimeFormatter dateTimeFormatterReportGeneration = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String reportGenerationTime = dateTime.format(dateTimeFormatterReportGeneration);
@@ -62,7 +62,7 @@ public class EmailSender {
         System.out.println("going to send mail : " + getDbHealthCheckReportMessage().getTo());
 
         getEmailSender().send(mimeMessage);
-        System.out.println("DB Health Check Report Delivered Sent Successfully...");
+        System.out.println("Utility Report Report Delivered Sent Successfully...");
     }
 
 }

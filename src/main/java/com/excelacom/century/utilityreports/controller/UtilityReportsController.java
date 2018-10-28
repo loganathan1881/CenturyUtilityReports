@@ -1,6 +1,7 @@
 package com.excelacom.century.utilityreports.controller;
 
 import com.excelacom.century.utilityreports.helper.DBHealthCheckReportDisplayHelper;
+import com.excelacom.century.utilityreports.helper.RCATrackerReportDisplayHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -21,6 +22,18 @@ public class UtilityReportsController {
 
     @Autowired
     private DBHealthCheckReportDisplayHelper dBHealthCheckReportDisplayHelper;
+
+    public RCATrackerReportDisplayHelper getRcaTrackerReportDisplayHelper() {
+        return rcaTrackerReportDisplayHelper;
+    }
+
+    public void setRcaTrackerReportDisplayHelper(RCATrackerReportDisplayHelper rcaTrackerReportDisplayHelper) {
+        this.rcaTrackerReportDisplayHelper = rcaTrackerReportDisplayHelper;
+    }
+
+    @Autowired
+    private RCATrackerReportDisplayHelper rcaTrackerReportDisplayHelper;
+
 
     @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
     public ModelAndView dashboardView(ModelMap model) {
@@ -47,6 +60,18 @@ public class UtilityReportsController {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("reports/dbhealthcheck");
         modelAndView.addObject("dbHealthCheckList", getdBHealthCheckReportDisplayHelper()
+                .getReport());
+        //modelAndView.addObject("msg", "No Records Found");
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/rcatracker", method = RequestMethod.GET)
+    public ModelAndView rcaTracker(ModelMap model) {
+        System.out.println("rcaTracker - Enter");
+
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("reports/rcatracker");
+        modelAndView.addObject("rcaTrackerList", getRcaTrackerReportDisplayHelper()
                 .getReport());
         //modelAndView.addObject("msg", "No Records Found");
         return modelAndView;

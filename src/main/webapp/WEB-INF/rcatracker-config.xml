@@ -1,0 +1,112 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!--QUARTZ CONFIGURATION -->
+
+    <!-- Quart Job Configuration -->
+    <bean name="rcaTrackerReportDisplayHelper" class="com.excelacom.century.utilityreports.helper.RCATrackerReportDisplayHelper">
+        <property name="rcaTrackerMySQLServerJdbcTemplate" ref="rcaTrackerMySQLServerJdbcTemplate"/>
+    </bean>
+
+    <!-- Scheduler Configuration -->
+    <bean name="rcaTrackerReportGeneratorScheduler"
+          class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass"
+                  value="com.excelacom.century.utilityreports.jobexecutor.RCATrackerReportGenerator"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="rcaTrackerGeneratorJdbcTemplate" value-ref="rcaTrackerGeneratorJdbcTemplate"/>
+                <entry key="rcaTrackerMySQLServerJdbcTemplate" value-ref="rcaTrackerMySQLServerJdbcTemplate"/>
+                <entry key="queryInputFile" value="${rcatrackerreport.generator.input.queryfile}"/>
+                <entry key="outputFilePath" value="${rcatrackerreport.generator.output.filepath}"/>
+                <entry key="outputFileName" value="${rcatrackerreport.generator.output.filename}"/>
+                <entry key="outputFileExtension" value="${rcatrackerreport.generator.output.fileextension}"/>
+                <entry key="rcaTrackerEmailComponent" value-ref="rcaTrackerEmailComponent"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean name="rcaTrackerEmailComponent" class="com.excelacom.century.utilityreports.email.RCATrackerEmailSender">
+        <property name="rcaTrackerEmailSenderImpl" ref="rcaTrackerEmailSenderImpl"/>
+        <property name="rcaTrackerReportMessage" ref="rcaTrackerReportMessage"/>
+    </bean>
+
+    <!-- CRON Expression -->
+    <bean id="rcaTrackerGeneratorTrigger"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="rcaTrackerReportGeneratorScheduler"/>
+        <property name="cronExpression" value="${rcatrackerreport.generator.cronexpression}"/>
+    </bean>
+
+    <!-- Bind triggers with the Scheduler -->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="rcaTrackerGeneratorTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Oralce Database Configuration -->
+    <bean id="rcaTrackerGeneratorDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${rcatrackerreport.generator.oracle.classname}"/>
+        <property name="url" value="${rcatrackerreport.generator.oracle.url}"/>
+        <property name="username" value="${rcatrackerreport.generator.oracle.username}"/>
+        <property name="password" value="${rcatrackerreport.generator.oracle.password}"/>
+    </bean>
+
+    <bean id="rcaTrackerGeneratorJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="rcaTrackerGeneratorDataSource"/>
+    </bean>
+
+    <!-- MySQL Database Configuration -->
+    <bean id="rcaTrackerMySQLServerDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${rcatrackerreport.distributor.mysql.classname}"/>
+        <property name="url" value="${rcatrackerreport.distributor.mysql.url}"/>
+        <property name="username" value="${rcatrackerreport.distributor.mysql.username}"/>
+        <property name="password" value="${rcatrackerreport.distributor.mysql.password}"/>
+    </bean>
+
+    <bean id="rcaTrackerMySQLServerJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="rcaTrackerMySQLServerDataSource"/>
+    </bean>
+
+    <!-- Email Configuration -->
+    <bean id="rcaTrackerEmailSenderImpl" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${utilityreports.email.smtp.host}"/>
+        <property name="port" value="${utilityreports.email.smtp.port}"/>
+        <property name="username" value="${utilityreports.email.smtp.username}"/>
+        <property name="password" value="${utilityreports.email.smtp.password}"/>
+
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.debug">true</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="rcaTrackerReportMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="from" value="${rcatrackerreport.distributor.email.from}"/>
+        <property name="to" value="${rcatrackerreport.distributor.email.to}"/>
+        <property name="subject" value="${rcatrackerreport.distributor.email.subject}"/>
+        <property name="text">
+            <value>
+                <![CDATA[
+                    ${rcatrackerreport.distributor.email.body}
+                ]]>
+            </value>
+        </property>
+    </bean>
+
+</beans>

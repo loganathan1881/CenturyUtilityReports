@@ -32,7 +32,15 @@ import java.util.Scanner;
 
 public class DBHealthCheckReportGenerator extends QuartzJobBean {
 
-    private JdbcTemplate jdbcTemplate;
+    public JdbcTemplate getDbHealthCheckGeneratorJdbcTemplate() {
+        return dbHealthCheckGeneratorJdbcTemplate;
+    }
+
+    public void setDbHealthCheckGeneratorJdbcTemplate(JdbcTemplate dbHealthCheckGeneratorJdbcTemplate) {
+        this.dbHealthCheckGeneratorJdbcTemplate = dbHealthCheckGeneratorJdbcTemplate;
+    }
+
+    private JdbcTemplate dbHealthCheckGeneratorJdbcTemplate;
 
     public EmailSender getDbHealthCheckEmailComponent() {
         return dbHealthCheckEmailComponent;
@@ -86,29 +94,23 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
     private String outputFileExtension;
 
 
-    public JdbcTemplate getMySQLJdbcTemplate() {
-        return mySQLJdbcTemplate;
+    public JdbcTemplate getDbHealthCheckMySQLServerJdbcTemplate() {
+        return dbHealthCheckMySQLServerJdbcTemplate;
     }
 
-    public void setMySQLJdbcTemplate(JdbcTemplate mySQLJdbcTemplate) {
-        this.mySQLJdbcTemplate = mySQLJdbcTemplate;
+    public void setDbHealthCheckMySQLServerJdbcTemplate(JdbcTemplate dbHealthCheckMySQLServerJdbcTemplate) {
+        this.dbHealthCheckMySQLServerJdbcTemplate = dbHealthCheckMySQLServerJdbcTemplate;
     }
 
-    private JdbcTemplate mySQLJdbcTemplate;
+    private JdbcTemplate dbHealthCheckMySQLServerJdbcTemplate;
 
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
-    }
 
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         System.out.println("DB Health Check Report Generator - Enter");
-        setJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("jdbcTemplate"));
-        setMySQLJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("localMySQLServerJdbcTemplate"));
+        setDbHealthCheckGeneratorJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("dbHealthCheckGeneratorJdbcTemplate"));
+        setDbHealthCheckMySQLServerJdbcTemplate((JdbcTemplate) jobExecutionContext.getJobDetail().getJobDataMap().get("dbHealthCheckMySQLServerJdbcTemplate"));
         setQueryInputFile((String) jobExecutionContext.getJobDetail().getJobDataMap().get("queryInputFile"));
         setOutputFilePath((String) jobExecutionContext.getJobDetail().getJobDataMap().get("outputFilePath"));
         setOutputFileName((String) jobExecutionContext.getJobDetail().getJobDataMap().get("outputFileName"));
@@ -161,7 +163,7 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
 
             for (StringBuilder query : queryList) {
                 System.out.println(query);
-                DBHealthCheckBean dbHealthCheckBean = getJdbcTemplate().queryForObject(query.toString(),
+                DBHealthCheckBean dbHealthCheckBean = getDbHealthCheckGeneratorJdbcTemplate().queryForObject(query.toString(),
                         new DBHealthCheckGeneratorRowMapper());
 
                 dbHealthCheckBeanList.add(dbHealthCheckBean);
@@ -170,7 +172,7 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
 
             for (DBHealthCheckBean dbHealthCheckBean : dbHealthCheckBeanList) {
 
-                getMySQLJdbcTemplate().update("INSERT INTO DB_HEALTH_CHECK_REPORT " +
+                getDbHealthCheckMySQLServerJdbcTemplate().update("INSERT INTO DB_HEALTH_CHECK_REPORT " +
                                 "(EXECUTION_TIME, VALIDATION_SCENARIO, COUNT) VALUES (?, ?, ?)", currentDate,
                         dbHealthCheckBean.getScenarioName(), dbHealthCheckBean.getCount());
 
@@ -207,7 +209,7 @@ public class DBHealthCheckReportGenerator extends QuartzJobBean {
             headerCell = headerRow.createCell(1);
             headerCell.setCellValue("Count");
 
-            List<DBHealthCheckBean> dbHealthCheckBeanList = getMySQLJdbcTemplate().query("select * from DB_HEALTH_CHECK_REPORT " +
+            List<DBHealthCheckBean> dbHealthCheckBeanList = getDbHealthCheckMySQLServerJdbcTemplate().query("select * from DB_HEALTH_CHECK_REPORT " +
                     "where execution_time = (select distinct(max(execution_time)) from " +
                     " DB_HEALTH_CHECK_REPORT) order by count desc", new DBHealthCheckDisplayReportRowMapper());
 
